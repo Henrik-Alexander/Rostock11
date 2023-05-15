@@ -16,8 +16,8 @@ knitr::opts_chunk$set(echo = FALSE, warning = F, message = F)
 
 ```{r}
 # Install packages
-install.packages("tidyverse")
-install.packages("HMDHFDplus")
+#install.packages("tidyverse")
+#install.packages("HMDHFDplus")
 
 # Load the packages
 library(tidyverse)
@@ -44,30 +44,20 @@ Mein Name ist Henrik und ich komme vom Max-Planck Institut für Demografische Fo
 
 
 ## Transition zum Thema
-Heute möchte ich meine Studie zum Thema Entwicklung und Fertilität in den Vereinigten Staaten von Amerika vorstellen. Dieses Projekt ist verwurzelt in einer alten Debatte über den Zusammenhang zwischen wirtschaftlicher Entwicklung und Bevölkerungsprozessen. Diese Debatte ist so alt und geht auf @malthus_essay_nodate zurück, sodass man sich fragen könnte, warum braucht es eine weitere Studie dazu. Drei Gründe haben mich dazu bewegt. 
+Heute möchte ich meine Studie zum Thema Entwicklung und Fertilität in den Vereinigten Staaten von Amerika vorstellen. Dieses Projekt ist verwurzelt in einer lang wehrende Debatte über den Zusammenhang zwischen wirtschaftlicher Entwicklung und Bevölkerungsprozessen. Diese Debatte ist so alt und geht auf @malthus_essay_nodate zurück, sodass man sich fragen könnte, warum braucht es eine weitere Studie dazu. Zwei Gründe haben mich dazu bewegt. 
 
 
 ## Warum Studie
 Erstens, die Debatte zum Zusammenhang zwischen Entwicklung und Geburtenverhalten hat noch keinen Konsens erreicht in der Disziplin. Dabei scheint eine Antwort so einfach. Schauen sie sich die Fertilität seit Anfang der Industrialisierung an. Gesellschaften wurden reicher und die Fertilität viel zeitgleich. Dieser parallele Trend führte zur Entwicklung von verschiedenen Theorien, die alle besagen, dass Entwicklung und Fertiltät einen negativen Zusammenhang besitzen. Zum Beispiel die Theorie des demografischen Übergangs(@notestein_population_1945) und des zweiten demografischen Übergangs (@lesthaeghe_twee_1986). Eine fallende Kindersterblichkeit reduziert den Bedarf für Geburten, die Bannung der Kinderarbeit reduziert das ökonomische Kalkül für Kinder, steigende Kosten von Kindern reduzieren den Anreiz für Kinder. Darüber hinaus ist mit der steigenden Erwerbstätigkeit von Frauen auch ein Konflikt zwischen Familie und Arbeit aufgekommen, den wir Demografen: Substitutions-Effekt nennen. Alles in allem waren die Zahlen und die Modelle eindeutig. Jedoch, gab es einen Anstieg der Fertilität in Ländern die ein sehr hohes Entwicklungsniveau erreicht hatten (@myrskyla_advances_2009). Die Begründung war, dass Maßnahmen in der Familienpolitik, wie z.B. bezahltes Elterngeld, Kindergeld, Ausbau von Kindertagesstätten et cetera, den zuvor erwähnten Konflikt zwischen familie und Beruf lösen. Diese Umkehr erzeugt ein grafisches Muster, das wie ein umgekehrtes "J" aussieht. Deswegen wollte ich mit neuen Daten prüfen, ob sich dieses "J" auch in anderen Kontexten finden lässt.
 
+![](Images\myrskyla09.jpg)
 
-```{r}
-# Plot
-ggplot(subset(df, Division == "Midwest"), aes(lag_HLI_female, TFR_female, colour = Year)) +
-  geom_point(alpha = 0.5) +
-  theme_bw(base_family = "serif", base_size = 15) +
-  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", size = 2, colour = "navyblue") +
-  ylab("Allgemeine Geburtenziffe") + xlab("Entwicklungsindikator") +
-  scale_colour_gradient(low = "navyblue", high = "red", name = "Jahr") +
-  theme(legend.position = "bottom",
-        legend.key.width = unit(2, "cm"),
-        legend.key.height = unit(0.2, "cm"))
-```
 
 
 
 ## Kritik 
-Der "J"-Förmige Zusammenhang wurde von einigen Stimmen in der Demografie angezweifelt, weil dieser Zusammenhang in den Daten nicht zwangsläufig ein kausaler Effekt sein muss. So könnten viele andere Faktoren dieses Muster hervorruffen. Zum Beispiel wird argumentiert, dass der Anstieg von einigen wenigen Ländern erzeugt wird, darunter zählen die USA, UK und die skandinavischen Länder, welche so besonders sind, dass man keinen generellen Schluss ziehen könne. Außerdem könnte der jahrelange Geburtenaufschub einen Nachholeffekt erzeugt haben. Deswegen habe ich mich beschlossen meine Studie durchzuführen, um die verschiedenen Kritikipunkte anzuschauen und ernst zu nehmen. 
+Zweitens, der "J"-Förmige Zusammenhang wurde von einigen Stimmen in der Demografie angezweifelt, weil dieser Zusammenhang in den Daten nicht zwangsläufig ein kausaler Effekt sein muss. So könnten viele andere Faktoren dieses Muster hervorruffen. Zum Beispiel wird argumentiert, dass der Anstieg von einigen wenigen Ländern erzeugt wird, darunter zählen die USA, UK und die skandinavischen Länder, welche so besonders sind, dass man keinen generellen Schluss ziehen könne. Außerdem könnte der jahrelange Geburtenaufschub einen Nachholeffekt erzeugt haben. Deswegen habe ich mich beschlossen meine Studie durchzuführen, um die verschiedenen Kritikipunkte anzuschauen und ernst zu nehmen. 
+
 
 ```{r}
 # HMD Passwort und Nutzername
@@ -75,7 +65,7 @@ nn <- "schubert@demogr.mpg.de"
 pw <- "2021Demographie"
 
 # Load the fertility data
-readHMDweb(CNTRY = "USA", username = nn, password = pw)
+#readHMDweb(CNTRY = "USA", username = nn, password = pw, header = F)
 ```
 
 
@@ -103,9 +93,27 @@ $$TFR_{t, i} = \beta_1 HLI_{t-1, i} + \beta_2  HLI^2_{t-1, i} + \lambda_t + \gam
 
 
 ## Ergebnisse
-Wir haben herausgefunden, dass ab einem hohen Entwicklungsniveau der Zusammenhang zwischen Entwicklung und Fertilität sich umkehrt. Dieser Befund ist stabil für verschiedene Enwicklungsindikatoren, jedoch stellt sich heraus, dass eine gewisse länge der Zeitreihe notwendig ist, um die Umkehr zu messen. Außerdem, ist die 
+Wir haben herausgefunden, dass ab einem hohen Entwicklungsniveau der Zusammenhang zwischen Entwicklung und Fertilität sich umkehrt. Dies lässt sich auch in der folgenden Grafik \@ref(us_umkehr) entnehmen. Ab einem gewissen nieveau kehrt sich der Zusammenhang um, und weitere Zugewinne in der Entwicklung erhöhen die Fertilität. 
 
+```{r us_umkehr}
+# Plot
+ggplot(subset(df, Division == "Midwest"), aes(lag_HLI_female, TFR_female, colour = Year)) +
+  geom_point(alpha = 0.5) +
+  theme_bw(base_family = "serif", base_size = 15) +
+  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", size = 2, colour = "navyblue") +
+  ylab("Allgemeine Geburtenziffe") + xlab("Entwicklungsindikator") +
+  scale_colour_gradient(low = "navyblue", high = "darkred", name = "Jahr") +
+  theme(legend.position = "bottom",
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(0.2, "cm"))
+```
+
+Dieser Befund ist stabil für verschiedene Enwicklungsindikatoren. Jedoch stellt sich heraus, dass eine gewisse länge der Zeitreihe notwendig ist, um die Umkehr zu messen.
 
 ![](Images\summary_tp_results.pdf)
+
+Außerdem habe ich hinweise auf die Mechanismen. Meine Daten deuten darauf hin, dass Geschlechtergerechtigkeit und eine niedrige Arbeitslosigkeit Voraussetzungen für positive Entwicklungen sind.
+
+Ich möchte abschließen mit einem Hinweis, dass es neben Entwicklung noch viele andere Faktoren gibt, welche die Fertilität beeinflussen. So viel die Geburtenrate nach der Finanzkrise in den USA über mehre Jahre. Außerdem hat die Pandemie in vielen Ländern für Reduktionen in der Fertilität gesorgt, aber es gab auch Schwankungen nach oben, warum eine neue Publikation die Fertilität als *Roller-Coater Fertility* bezeichnet hat
 
 # Reference
