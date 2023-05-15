@@ -2,7 +2,9 @@
 title: "Script - Rostock 11"
 author: "Henrik Schubert"
 date: "2023-05-15"
-output: html_document
+header-includes:
+    - \usepackage{setspace}\doublespacing
+output: pdf_document
 bibliography: bib.bib
 editor_options: 
   chunk_output_type: console
@@ -13,6 +15,10 @@ knitr::opts_chunk$set(echo = FALSE, warning = F, message = F)
 ```
 
 ```{r}
+# Install packages
+install.packages("tidyverse")
+install.packages("HMDHFDplus")
+
 # Load the packages
 library(tidyverse)
 library(HMDHFDplus)
@@ -25,11 +31,16 @@ load("Data/analysis.Rda")
 
 
 # Create division
-df$Division <- divisioning(df$State)
+df <- mutate(df, Division = 
+                             case_when(
+                             State %in% c("New Jersey", "New York", "Pennsylvania", "Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont") ~ "Northeast",
+                             State %in% c("Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", "North Dakota", "South Dakota", "Indiana", "Illinois", "Michigan", "Ohio", "Wisconsin") ~ "Midwest", 
+                             State %in% c("Delaware", "District of Columbia", "Florida", "Georgia", "Maryland", "North Carolina", "South Carolina", "Virginia", "West Virginia", "Alabama", "Kentucky", "Mississippi", "Tennessee", "Arkansas", "Louisiana", "Oklahoma", "Texas") ~ "South",
+                             State %in% c("Arizona", "Colorado", "Idaho", "New Mexico", "Montana", "Utah", "Wyoming", "Nevada", "Alaska", "California", "Hawaii", "Oregon", "Washington") ~ "West"))
 ```
 
 ## Vorstellen
-Mein Name ist Henrik und ich komme vom Max-Planck Institut für Demografische Forschung. Ich arbeite zurzeit an meiner Dissertation zu männlichen Fertilität. Keine Sorge, ich zähle keine Spermien. Dass überlassen wir den Kollegen in der Biologie und Universitätmedizing. **Fertilität** in der Demographie ist das Geburtenverhalten, also die Anzahl der Kinder die in einer Bevölkerung bzw. von Personen im Durchschnitt bekommen werden, und welche Faktoren eine Rolle spielen für diese Zahl.
+Mein Name ist Henrik und ich komme vom Max-Planck Institut für Demografische Forschung. Ich arbeite zurzeit an meiner Dissertation über die Fertilität von Männern. Keine Sorge, ich zähle keine Spermien. Dass überlassen ich den Kollegen in der Biologie und Universitätmedizing. **Fertilität** in der Demographie ist das Geburtenverhalten, also die Anzahl der Kinder die in einer Bevölkerung bzw. von Personen im Durchschnitt bekommen werden, und welche Faktoren eine Rolle spielen für diese Zahl. **Fekundität** ist das biologische Vermögen Kinder zu bekommen.
 
 
 ## Transition zum Thema
@@ -38,6 +49,21 @@ Heute möchte ich meine Studie zum Thema Entwicklung und Fertilität in den Vere
 
 ## Warum Studie
 Erstens, die Debatte zum Zusammenhang zwischen Entwicklung und Geburtenverhalten hat noch keinen Konsens erreicht in der Disziplin. Dabei scheint eine Antwort so einfach. Schauen sie sich die Fertilität seit Anfang der Industrialisierung an. Gesellschaften wurden reicher und die Fertilität viel zeitgleich. Dieser parallele Trend führte zur Entwicklung von verschiedenen Theorien, die alle besagen, dass Entwicklung und Fertiltät einen negativen Zusammenhang besitzen. Zum Beispiel die Theorie des demografischen Übergangs(@notestein_population_1945) und des zweiten demografischen Übergangs (@lesthaeghe_twee_1986). Eine fallende Kindersterblichkeit reduziert den Bedarf für Geburten, die Bannung der Kinderarbeit reduziert das ökonomische Kalkül für Kinder, steigende Kosten von Kindern reduzieren den Anreiz für Kinder. Darüber hinaus ist mit der steigenden Erwerbstätigkeit von Frauen auch ein Konflikt zwischen Familie und Arbeit aufgekommen, den wir Demografen: Substitutions-Effekt nennen. Alles in allem waren die Zahlen und die Modelle eindeutig. Jedoch, gab es einen Anstieg der Fertilität in Ländern die ein sehr hohes Entwicklungsniveau erreicht hatten (@myrskyla_advances_2009). Die Begründung war, dass Maßnahmen in der Familienpolitik, wie z.B. bezahltes Elterngeld, Kindergeld, Ausbau von Kindertagesstätten et cetera, den zuvor erwähnten Konflikt zwischen familie und Beruf lösen. Diese Umkehr erzeugt ein grafisches Muster, das wie ein umgekehrtes "J" aussieht. Deswegen wollte ich mit neuen Daten prüfen, ob sich dieses "J" auch in anderen Kontexten finden lässt.
+
+
+```{r}
+# Plot
+ggplot(subset(df, Division == "Midwest"), aes(lag_HLI_female, TFR_female, colour = Year)) +
+  geom_point(alpha = 0.5) +
+  theme_bw(base_family = "serif", base_size = 15) +
+  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", size = 2, colour = "navyblue") +
+  ylab("Allgemeine Geburtenziffe") + xlab("Entwicklungsindikator") +
+  scale_colour_gradient(low = "navyblue", high = "red", name = "Jahr") +
+  theme(legend.position = "bottom",
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(0.2, "cm"))
+```
+
 
 
 ## Kritik 
@@ -49,20 +75,37 @@ nn <- "schubert@demogr.mpg.de"
 pw <- "2021Demographie"
 
 # Load the fertility data
-#d2 <- readHFDweb(CNTRY = "SWE", item = "tfrRR", username = nn, password = pw)
+readHMDweb(CNTRY = "USA", username = nn, password = pw)
 ```
 
 
 ## Daten
+Wie berchnet man nun die Fertilität. Man braucht einerseits die Zahl der Geburten. Woher bekommt man die Geburten. Man bekommt die Geburten von der Geburtenstatistik, welche aus Angaben von den Geburtszertifikaten besteht. Diese Zertifikate sind offizielle Dokumente, und deswegen haben sie eine sehr hohe Qualität. Ein solches Geburtenzertifikat ist unten abgebildet, und man kann gleich sehen, dass hier alle wichtigen Informationen enthalten sind: Alter der Mutter, Alter des Vaters, Wohnort, Datum. Diese Informationen habe ich für die Jahre von 1969 bis 2018 gesammelt. Das müsst ihr euch vorstellen, dass sind mehr als 100 Millionen Geburten, also 100 Millionen Zertifikate.
 
-![](obama.birthcert.webp)
 
-```{r}
-# Plot
-ggplot(subset(df, Division == "West South Central"), aes(lag_HLI_female, TFR_female)) +
-  geom_point() +
-  theme_bw(base_family = "serif", base_size = 15) +
-  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)") +
-  ylab("Allgemeine Geburtenziffe") + xlab("Entwicklungsindikator")
-```
 
+![](Images\obama_certificate.jpg)
+
+
+Die Geburten sind schon einmal ein guter Start, aber bei weitem nicht ausreichend. Z.B. wird es mehr Geburten geben in Staaten wo viele Menschen leben. Das heißt, ich wollte eine Rate berechnen, welche die Risikobevölkerung berücksichtigt. Außerdem möchte ich noch für die Altersstruktut kontrollieren. Deswegen haben wir altersspezifische Geburtenraten berchnet, welche sich aus der Anzahl der Geburten für Mütter im Alter $x$ geteilt durch die Anzahl der Risikobevölkerung, also Frauen im Alter $x$ berechnet. Also brauchte ich Bevölkerungsdaten aufgeschlüsselt nach Staat, Alter, Geschlecht und Jahr. Diese habe ich vom U.S. Census bekommen.
+
+$$ ASFR = \frac{Geburten(x)}{Risikobevölkerung(x)}$$
+
+
+Was ist Entwicklung? Da können sie sich einmal kurz ein paar Sekunden nehmen und nachdenken, wie man Entwicklung messen kann. Ich kann ihn sagen, es gibt mehr Antworten auf die Frage als Personen in diesem Raum. Um nur einmal fünf zu nennen: Bruttoinlandsprodukt, Kindersterblichkeit, Durchschnittliche Schulzeit, Lebenserwartung und den Human Development Index. Alle Indikatoren weisen Vor- und gewisse Nachteile auf, und deswegen ist eine Entscheidung schwierig und immer subjektiv gefärbt. Aus diesem Grund habe ich mich entschieden nicht einen Indikator, sondern gleich mehrere zu nutzen. Einmal nutze ich den Human Life Indikator, welcher die Ungleichheit in der Sterblichkeit misst, und deswegen auch soziale Ungleichheit berücksichtig. Außerdem nehme ich den Human Development Index, welcher wohl am bekanntesten ist. Als letztes nutze ich die Lebenserwartung, welche die durchschnittliche Lebenswerartung für eine Person ist, unter zeitlich unveränderter Sterblichkeitsverhältnissen. 
+
+## Methodik
+Wie stellt man nun fest, ob ab einem gewissen Punkt sich der Zusammenhang zwischen Entwicklung und Fertilität umkehrt? Man könnte einfach Assoziationen messen, und schauen, ob die sich ändern. Jedoch ist hierbei das Problem, dass Assoziationen nicht Kausalität bedeuten. Deswegen brauch man eine Methodik, welche für unbeobachtete Störfaktoren kontrolliert. Ich habe mich entschieden verschiedene Modelle zu rechnen, welche für zeit-spezifische, Staats-spezifische Störfaktoren kontrollieren. Mein Hauptmodell nennt sich *fixed effects individual slope regression* (FEIS).
+
+$$TFR_{t, i} = \beta_1 HLI_{t-1, i} + \beta_2  HLI^2_{t-1, i} + \lambda_t + \gamma_i + \epsilon_{t, i} $$
+
+
+
+
+## Ergebnisse
+Wir haben herausgefunden, dass ab einem hohen Entwicklungsniveau der Zusammenhang zwischen Entwicklung und Fertilität sich umkehrt. Dieser Befund ist stabil für verschiedene Enwicklungsindikatoren, jedoch stellt sich heraus, dass eine gewisse länge der Zeitreihe notwendig ist, um die Umkehr zu messen. Außerdem, ist die 
+
+
+![](Images\summary_tp_results.pdf)
+
+# Reference
