@@ -2,7 +2,7 @@
 title: "Script - Rostock 11"
 author: "Henrik Schubert"
 date: "2023-05-15"
-output: pdf_document
+output: html_document
 bibliography: bib.bib
 editor_options: 
   chunk_output_type: console
@@ -17,9 +17,15 @@ knitr::opts_chunk$set(echo = FALSE, warning = F, message = F)
 library(tidyverse)
 library(HMDHFDplus)
 
+# Load the functions
+source("Functions.R")
+
 # Load the data
 load("Data/analysis.Rda")
 
+
+# Create division
+df$Division <- divisioning(df$State)
 ```
 
 ## Vorstellen
@@ -43,7 +49,7 @@ nn <- "schubert@demogr.mpg.de"
 pw <- "2021Demographie"
 
 # Load the fertility data
-d2 <- readHFDweb(CNTRY = "SWE", item = "tfrRR", username = nn, password = pw)
+#d2 <- readHFDweb(CNTRY = "SWE", item = "tfrRR", username = nn, password = pw)
 ```
 
 
@@ -53,8 +59,10 @@ d2 <- readHFDweb(CNTRY = "SWE", item = "tfrRR", username = nn, password = pw)
 
 ```{r}
 # Plot
-ggplot(df, aes(lag_HLI_female, TFR_female)) +
+ggplot(subset(df, Division == "West South Central"), aes(lag_HLI_female, TFR_female)) +
   geom_point() +
-  theme_bw(base_family = "serif", base_size = 15)
+  theme_bw(base_family = "serif", base_size = 15) +
+  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)") +
+  ylab("Allgemeine Geburtenziffe") + xlab("Entwicklungsindikator")
 ```
 
