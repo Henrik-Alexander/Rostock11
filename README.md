@@ -17,3 +17,6 @@ Die Strukture der Repositry folg:
 *   `\Script_presentation_Rostock11.Rmd`: Diese Datei enthält das R-Markdown script um das gleichnamige PDF zu erstellen
 *   `\Script_presentation_Rostock11.pdf`: Diese Datei das Skript für die Präsentation bei Rostock's 11
 
+
+
+

@@ -1,0 +1,57 @@
+---
+title: "Slides"
+author: "Henrik Schubert"
+date: "2023-05-16"
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## Meine Motivation
+![](Images\myrskyla09.jpg)
+
+
+---
+## Daten
+
+![](Images\obama_certificate.jpg)
+
+--
+## Ergebnisse
+
+```{r}
+# Load the packages
+library(tidyverse)
+library(HMDHFDplus)
+
+
+# Load the data
+load("Data/analysis.Rda")
+
+
+# Create division
+df <- mutate(df, Division = 
+                             case_when(
+                             State %in% c("New Jersey", "New York", "Pennsylvania", "Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont") ~ "Northeast",
+                             State %in% c("Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", "North Dakota", "South Dakota", "Indiana", "Illinois", "Michigan", "Ohio", "Wisconsin") ~ "Midwest", 
+                             State %in% c("Delaware", "District of Columbia", "Florida", "Georgia", "Maryland", "North Carolina", "South Carolina", "Virginia", "West Virginia", "Alabama", "Kentucky", "Mississippi", "Tennessee", "Arkansas", "Louisiana", "Oklahoma", "Texas") ~ "South",
+                             State %in% c("Arizona", "Colorado", "Idaho", "New Mexico", "Montana", "Utah", "Wyoming", "Nevada", "Alaska", "California", "Hawaii", "Oregon", "Washington") ~ "West"))
+
+# Plot
+ggplot(subset(df, Division == "Midwest"), aes(lag_HLI_female, TFR_female, colour = Year)) +
+  geom_point(alpha = 0.5) +
+  theme_bw(base_family = "serif", base_size = 15) +
+  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", size = 2, colour = "navyblue") +
+  ylab("Allgemeine Geburtenziffe") + xlab("Entwicklungsindikator") +
+  scale_colour_gradient(low = "navyblue", high = "darkred", name = "Jahr") +
+  theme(legend.position = "bottom",
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(0.2, "cm"))
+```
+
+---
+
+
