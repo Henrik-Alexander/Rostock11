@@ -40,6 +40,10 @@ df <- mutate(df, Division =
                              State %in% c("Delaware", "District of Columbia", "Florida", "Georgia", "Maryland", "North Carolina", "South Carolina", "Virginia", "West Virginia", "Alabama", "Kentucky", "Mississippi", "Tennessee", "Arkansas", "Louisiana", "Oklahoma", "Texas") ~ "South",
                              State %in% c("Arizona", "Colorado", "Idaho", "New Mexico", "Montana", "Utah", "Wyoming", "Nevada", "Alaska", "California", "Hawaii", "Oregon", "Washington") ~ "West"))
 
+# Save the midwest data
+data <- subset(df, Division == "Midwest")
+write.csv(data, "Data/midwest_data.csv")
+
 # Plot
 ggplot(subset(df, Division == "Midwest"), aes(lag_HLI_female, TFR_female, colour = Year)) +
   geom_point(alpha = 0.5) +
