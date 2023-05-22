@@ -47,7 +47,7 @@ transf.hdi <- function(x) -log(1-x)
 
 hdi.graph <-
   function(all.data,year,transf=T,newplot=T,
-           pcol=1,lcol=3,pch=21,lwd=2,cex=1,
+           pcol="darkred",lcol="darkblue",pch=21,lwd=2,cex=1,
            do.xaxis=T,do.yaxis = T,do.cbox=F,
            add.smooth=T,
            lowess.f=.275,

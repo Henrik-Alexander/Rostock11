@@ -43,14 +43,14 @@ graphics.off()
 transf.hdi <- function(x) -log(1-x)
 pdf("Figures/figure-1.pdf",width=3.5,height=3.5)
 par(cex=.55,cex.lab=1,font.lab=2,mar=c(3, 3, .05, .05),mgp=c(2,.8,0))
-hdi.graph(hdi.data,1975,pcol=4,lcol=4,pch=15,lwd=2.5,
+hdi.graph(hdi.data,1975,pcol="darkblue",lcol="darkblue",pch=15,lwd=2.5,
           do.cbox=T,lowess.f=.3,print.countries=T)
-text(transf.hdi(.965),transf.tfr(7),"1975",cex=1.2,col=4,adj=1,font=2)
-points(transf.hdi(.945),transf.tfr(7),col=4,pch=15,lwd=2.5)
-hdi.graph(hdi.data,2005,newplot=F,pcol=2,lcol=2,pch=17,lwd=2.5,
+text(transf.hdi(.965),transf.tfr(7),"1975",cex=1.2,col="darkblue",adj=1,font=2)
+points(transf.hdi(.945),transf.tfr(7),col="darkblue",pch=15,lwd=2.5)
+hdi.graph(hdi.data,2005,newplot=F,pcol="darkred",lcol="darkred",pch=17,lwd=2.5,
           lowess.f=.25,print.countries=T)
-text(transf.hdi(.965),transf.tfr(6),"2005",cex=1.2,col=2,adj=1,font=2)
-points(transf.hdi(.945),transf.tfr(6),col=2,pch=17,lwd=2.5)
+text(transf.hdi(.965),transf.tfr(6),"2005",cex=1.2,col="darkred",adj=1,font=2)
+points(transf.hdi(.945),transf.tfr(6),col="darkred",pch=17,lwd=2.5)
 dev.off()
 
 ## Figure S.3 in Supplemental Information
@@ -69,8 +69,8 @@ text(transf.hdi(.965),transf.tfr(6),"2005",cex=1.2,col=2,adj=1,font=2)
 points(transf.hdi(.945),transf.tfr(6),col=2,pch=17,lwd=2.5)
 hdi.graph(adj.hdi.data,2005,newplot=F,pcol=1,lcol=1,pch=19,lwd=2.5,
           lowess.f=.5,print.countries=T)
-text(transf.hdi(.965),transf.tfr(5.1),"2005",cex=1.2,col=1,adj=1,font=2)
-text(transf.hdi(.965),transf.tfr(4.5),"with adj. TFR",cex=1.2,col=1,adj=1,
+text(transf.hdi(.965),transf.tfr(5.1),"2005",cex=1.2,col="darkblue",adj=1,font=2)
+text(transf.hdi(.965),transf.tfr(4.5),"with adj. TFR",cex=1.2,col="darkred",adj=1,
      font=2)
 points(transf.hdi(.945),transf.tfr(5.1),col=1,pch=19,lwd=2.5)
 dev.off()
