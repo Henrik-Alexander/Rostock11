@@ -22,6 +22,8 @@ knitr::opts_chunk$set(echo = FALSE, warning = F, message = F)
 # Load the packages
 library(tidyverse)
 library(HMDHFDplus)
+library(rvest)
+library(HMDHFDplus)
 
 # Load the functions
 #source("Functions.R")
@@ -119,5 +121,84 @@ Dieser Befund ist stabil für verschiedene Enwicklungsindikatoren. Jedoch stellt
 Außerdem habe ich hinweise auf die Mechanismen. Meine Daten deuten darauf hin, dass Geschlechtergerechtigkeit und eine niedrige Arbeitslosigkeit Voraussetzungen für positive Entwicklungen sind.
 
 Ich möchte abschließen mit einem Hinweis, dass es neben Entwicklung noch viele andere Faktoren gibt, welche die Fertilität beeinflussen. So viel die Geburtenrate nach der Finanzkrise in den USA über mehre Jahre. Außerdem hat die Pandemie in vielen Ländern für Reduktionen in der Fertilität gesorgt, aber es gab auch Schwankungen nach oben, warum eine neue Publikation die Fertilität als *Roller-Coater Fertility* bezeichnet hat
+
+
+```{r Germany}
+
+# Set the account details for global data lab
+GDLun <- "schubert@demogr.mpg.de"
+GDLpw <- "2021Demographie"
+ 
+# Password and username for the US mortality database
+myHFDusername <-  "schubert@demogr.mpg.de" #"INSERT_YOUR_USMDB_USERNAME" 
+myHFDpassword <-  "E-Dagger2023"           #"INSERT_YOUR_USMDB_PASSWORD" 
+
+
+# Load the TFR
+tfr <- readHFDweb(CNTR = "DEUTNP", item = "tfrRR", username = myHFDusername, password = myHFDpassword)
+
+
+# Load the TFR
+lt1 <- readHMDweb(CNTR = "DEUTNP", item = "fltper_1x1",  username = myHFDusername, password = myHFDpassword)
+lt_old <- read.csv("Data/german_lifetables.csv")
+
+# Get the ax-columns
+ax <- subset(lt1, subset = Year == 1990, select = c(ax, Age))
+
+  
+# Subset the data
+lt_old <- subset(lt_old, subset = Sex == 2 & Year1 == Year2 & Year1 >= 1971 & Year1 < 1990, select = c(Year1, Age, d.x., AgeInt))
+
+# Rename variables
+lt_old <- rename(lt_old, Year = Year1, dx = d.x.)
+
+# Merge ax and lt
+lt_old1 <- left_join(lt_old[lt_old$AgeInt == 1,  ], ax) %>% select(-AgeInt)
+
+# Ax for the 5 year life table
+lt_old5 <- lt_old[lt_old$AgeInt == 5, ] %>% mutate(ax = if_else(Age >= 10, 2.5, 1)) %>% select(-AgeInt)
+
+# Bind both life tables together
+lt <- rbind(lt_old1,  lt1[, c("Year", "Age", "ax", "dx")])
+
+# Plot the life table funcitons
+ggplot(lt, aes(Age, dx, colour = Year, group = Year)) +
+  geom_line()
+
+# Estimate the HLI  
+HLI <- lt %>% mutate(d = dx/100000) %>% 
+  group_by(Year) %>% summarise(HLI = prod((Age+ax)^d), .groups = "drop") %>% 
+  select(Year, HLI)
+    
+# Join the data
+d <- left_join(tfr, HLI)
+
+# Plot
+ggplot(d, aes(HLI, TFR, colour = Year)) +
+  geom_point(alpha = 0.5) +
+  theme_test(base_family = "serif", base_size = 20) +
+  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 2, colour = "darkred") +
+  ylab("Zusammengefasste \n Fruchtbarkeitsziffer") + xlab("Entwicklungsindikator") +
+  scale_colour_gradient(low = "navyblue", high = "darkred", name = "Jahr") +
+  theme(axis.title = element_text(face = "bold")) +
+  guides(colour = "none")
+
+ggsave(plot = last_plot(), filename = "Figures/j_shape_Deut.pdf")
+
+
+# Plot
+ggplot(d, aes(HLI, TFR, colour = Year)) +
+  geom_point(alpha = 0.5) +
+  theme_test(base_family = "serif", base_size = 20) +
+  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 2, colour = "darkred") +
+  ylab("Zusammengefasste \n Fruchtbarkeitsziffer") + xlab("Entwicklungsindikator") +
+  scale_colour_gradient(low = "navyblue", high = "darkred", name = "Jahr") +
+  theme(axis.title = element_text(face = "bold")) +
+  guides(colour = "none")
+
+ggsave(plot = last_plot(), filename = "Figures/fert_increase_Deut.pdf")
+
+```
+
 
 # Reference
