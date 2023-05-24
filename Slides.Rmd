@@ -3,6 +3,8 @@ title: "Slides"
 author: "Henrik Schubert"
 date: "2023-05-16"
 output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -10,8 +12,73 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
+```{r Preperations}
+# Basic colours
+MPIDRgreen <- "#066E6E"
+MPIDRpurple <- "#800080"
+  
+  
+# Load packages
+library(tidyverse)
+library(HMDHFDplus)
+
+# set theme
+theme_set(theme_classic(base_size = 18, base_family = "serif"))
+theme_update(plot.margin = margin(0.1, 0.6, 0.1, 0.1, "cm"),
+             panel.grid.major.x = element_blank(),
+             panel.grid.minor.x = element_blank(),
+             panel.grid.minor.y = element_blank(),
+             legend.title = element_text(face = "bold"),
+             axis.title.x = element_text(face = "bold", size = 14, hjust = 1),
+             axis.title.y = element_text(face = "bold", size = 14, hjust = 1),
+             plot.title = element_text(hjust = 0.5),
+             legend.key.width = unit(1.8, "cm"),
+             legend.key.height = unit(0.2, "cm"),
+             legend.position = "bottom",
+             title = element_text(face = "bold")
+             
+)
+
+```
+
+
 ## Meine Motivation
+
+```{r, fig.height=7, fig.width=5}
+library(tidyverse)
+
+# Load the data
+d <- read.csv("Data/HDITFR_June_6_2009.csv",
+                               row.names=1)
+
+# Create country column
+d$Country <- rownames(d)
+
+# Years: 1975 2005
+d <- d %>% pivot_longer(cols = !Country, names_to = c("Variable", "Year"), values_to = "Value",  names_pattern = "([a-z]*[A-Z]*).([0-9]*)")
+
+
+# Filter years
+plot <- d %>% filter(Year %in% c(1975, 2005)) %>% filter(Variable %in% c("HDI", "TFR")) %>% 
+  pivot_wider(values_from = "Value", names_from = "Variable") %>%
+    mutate(HDI_trans = -log(1 - HDI),
+           HDI_trans = HDI_trans / max(HDI_trans, na.rm = T)) %>% 
+  ggplot(aes(HDI_trans, TFR, colour = Year, shape = Year)) +
+  geom_smooth(method = "loess", formula = "y ~ x", se = F, linewidth = 1.5) +
+  geom_point() +
+  xlab("HDI") +
+  scale_colour_manual(values = c("navyblue", "red")) +
+  theme(legend.position = c(0.8, 0.8))
+plot
+
+ggsave(plot, height = 10, width = 7, filename = "Figures/Mikko_ggplot.pdf")
+```
+
+
 ![](Images\myrskyla09.jpg)
+```{r}
+
+```
 
 
 ---
@@ -47,15 +114,103 @@ write.csv(data, "Data/midwest_data.csv")
 # Plot
 ggplot(subset(df, Division == "Midwest"), aes(lag_HLI_female, TFR_female, colour = Year)) +
   geom_point(alpha = 0.5) +
-  theme_bw(base_family = "serif", base_size = 15) +
-  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", size = 2, colour = "navyblue") +
-  ylab("Allgemeine Geburtenziffe") + xlab("Entwicklungsindikator") +
-  scale_colour_gradient(low = "navyblue", high = "darkred", name = "Jahr") +
-  theme(legend.position = "bottom",
-        legend.key.width = unit(2, "cm"),
-        legend.key.height = unit(0.2, "cm"))
+  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", size = 1.5, colour = MPIDRgreen) +
+  ylab("Allgemeine Geburtenziffer") + xlab("Entwicklungsindikator") +
+  scale_colour_gradient(low = MPIDRpurple, high = MPIDRgreen, name = "Jahr")
 ```
 
 ---
+
+## Umkehr des Zusammenhangs in Deutschland
+
+```{r us_umkehr}
+# Plot
+ggplot(subset(df, Division == "Midwest"), aes(lag_HLI_female, TFR_female, colour = Year)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 2, colour = MPIDRgreen) +
+  ylab("Zusammengefasste \n Fruchtbarkeitsziffer") + xlab("Entwicklungsindikator") +
+  scale_colour_gradient(low = MPIDRpurple, high = MPIDRgreen, name = "Jahr")
+
+ggsave(plot = last_plot(), filename = "Figures/fertility_dev_midwest.pdf", height = 10, width = 12, unit = "cm")
+
+```
+
+---
+
+
+## Wie sieht es aus in Deutschland?
+```{r Germany}
+
+# Set the account details for global data lab
+GDLun <- "schubert@demogr.mpg.de"
+GDLpw <- "2021Demographie"
+ 
+# Password and username for the US mortality database
+myHFDusername <-  "schubert@demogr.mpg.de" #"INSERT_YOUR_USMDB_USERNAME" 
+myHFDpassword <-  "E-Dagger2023"           #"INSERT_YOUR_USMDB_PASSWORD" 
+
+
+# Load the TFR
+tfr <- readHFDweb(CNTR = "DEUTW", item = "tfrRR", username = myHFDusername, password = myHFDpassword)
+
+
+# Load the TFR
+lt1 <- readHMDweb(CNTR = "DEUTNP", item = "fltper_1x1",  username = myHFDusername, password = myHFDpassword)
+lt_old <- read.csv("Data/german_lifetables.csv")
+
+# Get the ax-columns
+ax <- subset(lt1, subset = Year == 1990, select = c(ax, Age))
+
+  
+# Subset the data
+lt_old <- subset(lt_old, subset = Sex == 2 & Year1 == Year2 & Year1 >= 1971 & AgeInt == 1 &  Year1 < 1990, select = c(Year1, Age, d.x., AgeInt))
+
+# Are there duplicated rows
+lt_old <- unique(lt_old)
+
+# Rename variables
+lt_old <- rename(lt_old, Year = Year1, dx = d.x.)
+
+# Merge ax and lt
+lt_old1 <- left_join(lt_old[lt_old$AgeInt == 1,  ], ax) %>% select(-AgeInt)
+
+# Bind both life tables together
+lt <- rbind(lt_old1,  lt1[, c("Year", "Age", "ax", "dx")])
+
+# Plot the life table funcitons
+ggplot(lt, aes(Age, dx, colour = Year, group = Year)) +
+  geom_line()
+
+# Estimate the HLI  
+HLI <- lt %>% mutate(d = dx/100000) %>% 
+  group_by(Year) %>% summarise(HLI = prod((Age+ax)^d), .groups = "drop") %>% 
+  select(Year, HLI)
+    
+# Join the data
+d <- left_join(tfr, HLI)
+
+# Plot
+ggplot(d, aes(HLI, TFR)) +
+  geom_point(alpha = 0.5) +
+  geom_text(aes(label = Year)) +
+  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 2, colour = MPIDRgreen) +
+  ylab("Zusammengefasste \n Fruchtbarkeitsziffer") + xlab("Entwicklungsindikator") +
+  scale_colour_gradient(low = MPIDRpurple, high = MPIDRgreen, name = "Jahr") +
+  guides(colour = "none")
+
+ggsave(plot = last_plot(), filename = "Figures/j_shape_Deut.pdf")
+
+
+# Plot
+ggplot(d, aes(HLI, TFR)) +
+  geom_point(colour = MPIDRgreen) +
+  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 2, colour = "darkred") +
+  ylab("Zusammengefasste \n Fruchtbarkeitsziffer") + xlab("Entwicklungsindikator") +
+  theme(axis.title = element_text(face = "bold")) +
+  guides(colour = "none")
+
+ggsave(plot = last_plot(), filename = "Figures/fert_increase_Deut.pdf")
+
+```
 
 
