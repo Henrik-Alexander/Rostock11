@@ -126,12 +126,12 @@ Ich möchte abschließen mit einem Hinweis, dass es neben Entwicklung noch viele
 ```{r Germany}
 
 # Set the account details for global data lab
-GDLun <- "schubert@demogr.mpg.de"
-GDLpw <- "2021Demographie"
+GDLun <- "GDpassword"
+GDLpw <- "GDpassword"
  
 # Password and username for the US mortality database
-myHFDusername <-  "schubert@demogr.mpg.de" #"INSERT_YOUR_USMDB_USERNAME" 
-myHFDpassword <-  "E-Dagger2023"           #"INSERT_YOUR_USMDB_PASSWORD" 
+myHFDusername <-   #"INSERT_YOUR_USMDB_USERNAME" 
+myHFDpassword <-   #"INSERT_YOUR_USMDB_PASSWORD" 
 
 
 # Load the TFR
