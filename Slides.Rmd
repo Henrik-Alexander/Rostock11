@@ -1,9 +1,10 @@
 ---
 title: "Hooray for the J"
+subtitle: "Rostock's 11"
 author: "Henrik-Alexander Schubert"
 date: "`r gsub(' 0', ' ', format(Sys.Date(), format='%d %b %Y'))`"
 output:
-  xaringan::moon_reader:
+    xaringan::moon_reader:
     css: "../assets/cam-css.css"
     lib_dir: libs
     nature:
@@ -16,7 +17,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup, purl=FALSE}
+```{r setup,  echo = F}
 #| include: false
 knitr::opts_chunk$set(eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE, dev = "svg", fig.height = 7, fig.width = 7,
                       fig.align = 'center')
@@ -42,7 +43,6 @@ format(x, decimal.mark = ",", trim = TRUE, scientific = FALSE, ...)
 }
 
 # Load packages
-library(xaringanthemer)
 library(tidyverse)
 library(scales)
 library(HMDHFDplus)
@@ -75,7 +75,8 @@ theme_update(plot.margin = margin(0.1, 0.6, 0.1, 0.1, "cm"),
 
 ## Meine Motivation
 
-```{r Mikko-plot0, fig.height=5, fig.width=4}
+```{r Mikko-plot1, fig.height=5, fig.width=5}
+
 setwd("U:/Rostock11")
 # Load the data
 d <- read.csv("Data/HDITFR_June_6_2009.csv",
@@ -97,13 +98,7 @@ d <- d %>% filter(Year %in% c(1975, 2005)) %>% filter(Variable %in% c("HDI", "TF
     mutate(HDI_trans = transf.hdi(HDI),
            HDI_trans = HDI_trans / max(HDI_trans, na.rm = T), 
            TFR_trans = transf.tfr(TFR))
-```
 
----
-
-## Meine Motivation
-
-```{r Mikko-plot, fig.height=5, fig.width=4}
 # Plot mikko's graph
  d %>% filter(Year == 1975) %>% 
   ggplot(aes(HDI_trans, TFR, colour = Year, shape = Year)) +
@@ -119,7 +114,7 @@ d <- d %>% filter(Year %in% c(1975, 2005)) %>% filter(Variable %in% c("HDI", "TF
 
 ---
 ## Meine Motivation
-```{r Mikko-plot2, fig.height=5, fig.width=4}
+```{r Mikko-plot2, fig.height=5, fig.width=5}
 # Plot mikko's graph
  d %>% 
   ggplot(aes(HDI_trans, TFR, colour = Year, shape = Year)) +
@@ -137,7 +132,23 @@ d <- d %>% filter(Year %in% c(1975, 2005)) %>% filter(Variable %in% c("HDI", "TF
 ---
 ## Daten
 
-![](Images\obama_certificate.jpg)
+<img src="Images\obama_certificate.jpg" alt="Upside-down sloths are so cute", width = "40%", height = "50%", class = "center" >
+
+
+
+--
+
+$$ 
+\begin{bmatrix}
+Id & Jahr & State & \cdots & \textrm{Alter (Mutter)} & \textrm{Alter (Vaters)}  \\
+\hline
+1 & 1969 & Alabama & \cdots & 15 & 17 \\
+2 & 1969 & Alabama & \cdots& 15 & 17 \\
+3 & 1969 & Alabama & \cdots& 15 & 18 \\
+\vdots & \vdots  & \ddots &\vdots & \vdots & \vdots \\
+134.584.830 & 2018 & Wyoming & \cdots & 50 & 54 \\
+\end{bmatrix}
+$$
 
 ---
 
@@ -168,9 +179,11 @@ write.csv(data, "Data/midwest_data.csv")
 # Plot
 ggplot(subset(df, Division == "Midwest"), aes(lag_HLI_female, TFR_female, colour = Year)) +
   geom_point(alpha = 0.5) +
-  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", size = 1.5, colour = MPIDRgreen) +
-  ylab("Allgemeine \n Geburtenziffer") + xlab("Entwicklungsindikator") +
-  scale_colour_gradient(low = MPIDRpurple, high = MPIDRgreen, name = "Jahr")
+  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 1.5, colour = MPIDRgreen) +
+  ylab("Zusammengefasste \n Geburtenrate") + xlab("Entwicklungsindikator") +
+  scale_colour_gradient(low = MPIDRpurple, high = MPIDRgreen, name = "Jahr") +
+  scale_y_continuous(labels = comma_format(decimal.mark = ","), limits = c(1.25, 3)) 
+
 ```
 
 ---
@@ -186,15 +199,23 @@ d <- d %>% mutate(HLI_trans = log(HLI),
              HLI_trans2 = HLI_trans / max(HLI_trans, na.rm = T))
 
 # Plot
-ggplot(subset(d, Year >= 1965), aes(Year, TFR)) +
-  geom_point(colour = MPIDRpurple) +
+ggplot(subset(d, Year >= 1965), aes(Year, TFR, colour = Year)) +
+  geom_point() +
   geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 2, colour = MPIDRgreen) +
-  ylab("Zusammengefasste \n Fruchtbarkeitsziffer") + xlab("Jahr") +
+  ylab("Zusammengefasste \n Geburtenrate") + xlab("Jahr") +
   scale_colour_gradient(low = MPIDRpurple, high = MPIDRgreen, name = "Jahr") +
-  guides(colour = "none") +
-  scale_y_continuous(labels = comma_format(decimal.mark = ",")) 
+  scale_y_continuous(labels = comma_format(decimal.mark = ","), limits = c(1.25, 3)) 
+
 
 
 ```
 
+---
 
+## Weiterführende Hinweise
+
+- [Meine Ergebnisse zum nachlesen](https://www.demogr.mpg.de/papers/working/wp-2023-022.pdf)
+
+- [Meine Folien zum Runterladen und Herstellen](https://github.com/Henrik-Alexander/Rostock11)
+
+- [Mein Code zum Reproduzieren der Ergebnisse](https://osf.io/mrzb5/?view_only=3c18e2dc1b034b6bb74c4b5ca74b4a53)
