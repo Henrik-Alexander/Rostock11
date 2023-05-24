@@ -1,36 +1,67 @@
 ---
-title: "Slides"
-author: "Henrik Schubert"
-date: "2023-05-16"
-output: beamer_presentation
+title: "Hooray for the J"
+author: "Henrik-Alexander Schubert"
+date: "`r gsub(' 0', ' ', format(Sys.Date(), format='%d %b %Y'))`"
+output:
+  xaringan::moon_reader:
+    css: "../assets/cam-css.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: tomorrow-night-bright
+      highlightLines: true
+      countIncrementalSlides: false
+      beforeInit: "../assets/cam_macros.js"
+      titleSlideClass: ["center","top"]
 editor_options: 
   chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+```{r setup, purl=FALSE}
+#| include: false
+knitr::opts_chunk$set(eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE, dev = "svg", fig.height = 7, fig.width = 7,
+                      fig.align = 'center')
 ```
 
 
+
 ```{r Preperations}
+# Set the working directory
+#setwd("U:/Rostock11")
+
 # Basic colours
 MPIDRgreen <- "#066E6E"
-MPIDRpurple <- "#800080"
+MPIDRpurple <- "#3E2C51"
+MPIDRred <- "#8E2A3B"
+MPIDRorange <- "#EF7D00"
+MPIDRblue <- "#08445F"
+MPIDRyellow <- "#FAAF3B"
   
-  
+# Make decimial commas
+comma2 <- function(x, ...) {
+format(x, decimal.mark = ",", trim = TRUE, scientific = FALSE, ...)
+}
+
 # Load packages
+library(xaringanthemer)
 library(tidyverse)
+library(scales)
 library(HMDHFDplus)
+library(extrafont)
+
+
+# Import fonts
+#font_import()
+
 
 # set theme
-theme_set(theme_classic(base_size = 18, base_family = "serif"))
+theme_set(theme_classic(base_size = 18, base_family = "Roboto"))
 theme_update(plot.margin = margin(0.1, 0.6, 0.1, 0.1, "cm"),
              panel.grid.major.x = element_blank(),
              panel.grid.minor.x = element_blank(),
              panel.grid.minor.y = element_blank(),
              legend.title = element_text(face = "bold"),
-             axis.title.x = element_text(face = "bold", size = 14, hjust = 1),
-             axis.title.y = element_text(face = "bold", size = 14, hjust = 1),
+             axis.title.x = element_text(family = "Roboto Light", size = 14, hjust = 1),
+             axis.title.y = element_text(family = "Roboto Light", size = 14, hjust = 1, angle = 0),
              plot.title = element_text(hjust = 0.5),
              legend.key.width = unit(1.8, "cm"),
              legend.key.height = unit(0.2, "cm"),
@@ -44,9 +75,8 @@ theme_update(plot.margin = margin(0.1, 0.6, 0.1, 0.1, "cm"),
 
 ## Meine Motivation
 
-```{r, fig.height=7, fig.width=5}
-library(tidyverse)
-
+```{r Mikko-plot0, fig.height=5, fig.width=4}
+setwd("U:/Rostock11")
 # Load the data
 d <- read.csv("Data/HDITFR_June_6_2009.csv",
                                row.names=1)
@@ -57,39 +87,63 @@ d$Country <- rownames(d)
 # Years: 1975 2005
 d <- d %>% pivot_longer(cols = !Country, names_to = c("Variable", "Year"), values_to = "Value",  names_pattern = "([a-z]*[A-Z]*).([0-9]*)")
 
+# Function
+transf.tfr <- function(x, mu=31,prop.fem=.4886) log(prop.fem * x)/mu
+transf.hdi <- function(x) -log(1-x)
 
-# Filter years
-plot <- d %>% filter(Year %in% c(1975, 2005)) %>% filter(Variable %in% c("HDI", "TFR")) %>% 
+# Filteryears
+d <- d %>% filter(Year %in% c(1975, 2005)) %>% filter(Variable %in% c("HDI", "TFR")) %>% 
   pivot_wider(values_from = "Value", names_from = "Variable") %>%
-    mutate(HDI_trans = -log(1 - HDI),
-           HDI_trans = HDI_trans / max(HDI_trans, na.rm = T)) %>% 
+    mutate(HDI_trans = transf.hdi(HDI),
+           HDI_trans = HDI_trans / max(HDI_trans, na.rm = T), 
+           TFR_trans = transf.tfr(TFR))
+```
+
+---
+
+## Meine Motivation
+
+```{r Mikko-plot, fig.height=5, fig.width=4}
+# Plot mikko's graph
+ d %>% filter(Year == 1975) %>% 
   ggplot(aes(HDI_trans, TFR, colour = Year, shape = Year)) +
   geom_smooth(method = "loess", formula = "y ~ x", se = F, linewidth = 1.5) +
   geom_point() +
   xlab("HDI") +
-  scale_colour_manual(values = c("navyblue", "red")) +
-  theme(legend.position = c(0.8, 0.8))
-plot
+  scale_colour_manual(values = c(MPIDRgreen, MPIDRred)) +
+  scale_y_continuous(labels = comma_format(decimal.mark = ","), limits = c(1, 9)) +
+  scale_x_continuous(labels = comma_format(decimal.mark = ","), limits = c(0, 1))
 
-ggsave(plot, height = 10, width = 7, filename = "Figures/Mikko_ggplot.pdf")
+#ggsave(plot, height = 10, width = 7, filename = "Figures/Mikko_ggplot.pdf")
 ```
 
+---
+## Meine Motivation
+```{r Mikko-plot2, fig.height=5, fig.width=4}
+# Plot mikko's graph
+ d %>% 
+  ggplot(aes(HDI_trans, TFR, colour = Year, shape = Year)) +
+  annotate(geom = "rect", xmin = 0.6, xmax = 0.7, ymax = 8.5, ymin = 1, alpha = 0.3) +
+  geom_smooth(method = "loess", formula = "y ~ x", se = F, linewidth = 1.5) +
+  geom_point( ) +
+  xlab("HDI") +
+  scale_colour_manual(values = c(MPIDRgreen, MPIDRred)) +
+  scale_y_continuous(labels = comma_format(decimal.mark = ","), limits = c(1, 9)) +
+  scale_x_continuous(labels = comma_format(decimal.mark = ","), limits = c(0, 1))
 
-![](Images\myrskyla09.jpg)
-```{r}
-
+#ggsave(plot, height = 10, width = 7, filename = "Figures/Mikko_ggplot.pdf")
 ```
-
 
 ---
 ## Daten
 
 ![](Images\obama_certificate.jpg)
 
---
+---
+
 ## Ergebnisse
 
-```{r}
+```{r, fig.height=5, fig.width = 8}
 # Load the packages
 library(tidyverse)
 library(HMDHFDplus)
@@ -115,101 +169,31 @@ write.csv(data, "Data/midwest_data.csv")
 ggplot(subset(df, Division == "Midwest"), aes(lag_HLI_female, TFR_female, colour = Year)) +
   geom_point(alpha = 0.5) +
   geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", size = 1.5, colour = MPIDRgreen) +
-  ylab("Allgemeine Geburtenziffer") + xlab("Entwicklungsindikator") +
+  ylab("Allgemeine \n Geburtenziffer") + xlab("Entwicklungsindikator") +
   scale_colour_gradient(low = MPIDRpurple, high = MPIDRgreen, name = "Jahr")
-```
-
----
-
-## Umkehr des Zusammenhangs in Deutschland
-
-```{r us_umkehr}
-# Plot
-ggplot(subset(df, Division == "Midwest"), aes(lag_HLI_female, TFR_female, colour = Year)) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 2, colour = MPIDRgreen) +
-  ylab("Zusammengefasste \n Fruchtbarkeitsziffer") + xlab("Entwicklungsindikator") +
-  scale_colour_gradient(low = MPIDRpurple, high = MPIDRgreen, name = "Jahr")
-
-ggsave(plot = last_plot(), filename = "Figures/fertility_dev_midwest.pdf", height = 10, width = 12, unit = "cm")
-
 ```
 
 ---
 
 
 ## Wie sieht es aus in Deutschland?
-```{r Germany}
+```{r Germany, fig.height = 5, fig.width = 8}
+# Load the data
+load("Data/german_lt.Rda")
 
-# Set the account details for global data lab
-GDLun <- "schubert@demogr.mpg.de"
-GDLpw <- "2021Demographie"
- 
-# Password and username for the US mortality database
-myHFDusername <-  "schubert@demogr.mpg.de" #"INSERT_YOUR_USMDB_USERNAME" 
-myHFDpassword <-  "E-Dagger2023"           #"INSERT_YOUR_USMDB_PASSWORD" 
-
-
-# Load the TFR
-tfr <- readHFDweb(CNTR = "DEUTW", item = "tfrRR", username = myHFDusername, password = myHFDpassword)
-
-
-# Load the TFR
-lt1 <- readHMDweb(CNTR = "DEUTNP", item = "fltper_1x1",  username = myHFDusername, password = myHFDpassword)
-lt_old <- read.csv("Data/german_lifetables.csv")
-
-# Get the ax-columns
-ax <- subset(lt1, subset = Year == 1990, select = c(ax, Age))
-
-  
-# Subset the data
-lt_old <- subset(lt_old, subset = Sex == 2 & Year1 == Year2 & Year1 >= 1971 & AgeInt == 1 &  Year1 < 1990, select = c(Year1, Age, d.x., AgeInt))
-
-# Are there duplicated rows
-lt_old <- unique(lt_old)
-
-# Rename variables
-lt_old <- rename(lt_old, Year = Year1, dx = d.x.)
-
-# Merge ax and lt
-lt_old1 <- left_join(lt_old[lt_old$AgeInt == 1,  ], ax) %>% select(-AgeInt)
-
-# Bind both life tables together
-lt <- rbind(lt_old1,  lt1[, c("Year", "Age", "ax", "dx")])
-
-# Plot the life table funcitons
-ggplot(lt, aes(Age, dx, colour = Year, group = Year)) +
-  geom_line()
-
-# Estimate the HLI  
-HLI <- lt %>% mutate(d = dx/100000) %>% 
-  group_by(Year) %>% summarise(HLI = prod((Age+ax)^d), .groups = "drop") %>% 
-  select(Year, HLI)
-    
-# Join the data
-d <- left_join(tfr, HLI)
+# Transform the HLI
+d <- d %>% mutate(HLI_trans = log(HLI),
+             HLI_trans2 = HLI_trans / max(HLI_trans, na.rm = T))
 
 # Plot
-ggplot(d, aes(HLI, TFR)) +
-  geom_point(alpha = 0.5) +
-  geom_text(aes(label = Year)) +
+ggplot(subset(d, Year >= 1965), aes(Year, TFR)) +
+  geom_point(colour = MPIDRpurple) +
   geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 2, colour = MPIDRgreen) +
-  ylab("Zusammengefasste \n Fruchtbarkeitsziffer") + xlab("Entwicklungsindikator") +
+  ylab("Zusammengefasste \n Fruchtbarkeitsziffer") + xlab("Jahr") +
   scale_colour_gradient(low = MPIDRpurple, high = MPIDRgreen, name = "Jahr") +
-  guides(colour = "none")
+  guides(colour = "none") +
+  scale_y_continuous(labels = comma_format(decimal.mark = ",")) 
 
-ggsave(plot = last_plot(), filename = "Figures/j_shape_Deut.pdf")
-
-
-# Plot
-ggplot(d, aes(HLI, TFR)) +
-  geom_point(colour = MPIDRgreen) +
-  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 2, colour = "darkred") +
-  ylab("Zusammengefasste \n Fruchtbarkeitsziffer") + xlab("Entwicklungsindikator") +
-  theme(axis.title = element_text(face = "bold")) +
-  guides(colour = "none")
-
-ggsave(plot = last_plot(), filename = "Figures/fert_increase_Deut.pdf")
 
 ```
 
