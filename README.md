@@ -1,7 +1,7 @@
 # Rostock's 11
 
 ## Übersicht
-Diese Repository enthält die Daten, Skripte und Grafiken, um die Präsentation bei Rostock's 11 von Henrik-Alexander Schubert zu reproduzieren.
+Dieser Ordner enthält die Daten, Skripte und Grafiken, um meine Präsentation bei Rostock's 11 zu reproduzieren.
 
 ## Software and hardware
 The analysis were executed in [**R**](https://www.r-project.org/) version 4.2.1 (2022-06-23 ucrt). The computing unit was platform x86_64-w64-mingw32/x64 (64-bit).
