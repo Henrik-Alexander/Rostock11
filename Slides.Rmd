@@ -26,59 +26,15 @@ knitr::opts_chunk$set(eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE, dev =
 
 
 
-```{r Preperations}
-# Set the working directory
-#setwd("U:/Rostock11")
-
-# Basic colours
-MPIDRgreen <- "#066E6E"
-MPIDRpurple <- "#3E2C51"
-MPIDRred <- "#8E2A3B"
-MPIDRorange <- "#EF7D00"
-MPIDRblue <- "#08445F"
-MPIDRyellow <- "#FAAF3B"
-  
-# Make decimial commas
-comma2 <- function(x, ...) {
-format(x, decimal.mark = ",", trim = TRUE, scientific = FALSE, ...)
-}
-
-# Load packages
-library(tidyverse)
-library(scales)
-library(HMDHFDplus)
-library(extrafont)
-
-
-# Import fonts
-#font_import()
-
-
-# set theme
-theme_set(theme_classic(base_size = 18, base_family = "Roboto"))
-theme_update(plot.margin = margin(0.1, 0.6, 0.1, 0.1, "cm"),
-             panel.grid.major.x = element_blank(),
-             panel.grid.minor.x = element_blank(),
-             panel.grid.minor.y = element_blank(),
-             legend.title = element_text(face = "bold"),
-             axis.title.x = element_text(family = "Roboto Light", size = 14, hjust = 1),
-             axis.title.y = element_text(family = "Roboto Light", size = 14, hjust = 1, angle = 0),
-             plot.title = element_text(hjust = 0.5),
-             legend.key.width = unit(1.8, "cm"),
-             legend.key.height = unit(0.2, "cm"),
-             legend.position = "bottom",
-             title = element_text(face = "bold")
-             
-)
-
-```
-
-
 ## Meine Motivation
 
 ```{r Mikko-plot1, fig.height=5, fig.width=5}
 
 setwd("U:/Rostock11")
+
+# Load the functions
+source("Code/Functions.R")
+
 # Load the data
 d <- read.csv("Data/HDITFR_June_6_2009.csv",
                                row.names=1)
@@ -132,6 +88,7 @@ d <- d %>% filter(Year %in% c(1975, 2005)) %>% filter(Variable %in% c("HDI", "TF
 
 ---
 ## Daten
+
 
 <img src="Images\obama_certificate.jpg" alt="Upside-down sloths are so cute", width = "40%", height = "50%", class = "center" >
 
