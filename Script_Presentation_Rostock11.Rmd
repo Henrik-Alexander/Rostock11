@@ -14,32 +14,7 @@ editor_options:
 knitr::opts_chunk$set(echo = FALSE, warning = F, message = F)
 ```
 
-```{r}
-# Install packages
-#install.packages("tidyverse")
-#install.packages("HMDHFDplus")
 
-# Load the packages
-library(tidyverse)
-library(HMDHFDplus)
-library(rvest)
-library(HMDHFDplus)
-
-# Load the functions
-#source("Functions.R")
-
-# Load the data
-load("Data/analysis.Rda")
-
-
-# Create division
-df <- mutate(df, Division = 
-                             case_when(
-                             State %in% c("New Jersey", "New York", "Pennsylvania", "Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont") ~ "Northeast",
-                             State %in% c("Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", "North Dakota", "South Dakota", "Indiana", "Illinois", "Michigan", "Ohio", "Wisconsin") ~ "Midwest", 
-                             State %in% c("Delaware", "District of Columbia", "Florida", "Georgia", "Maryland", "North Carolina", "South Carolina", "Virginia", "West Virginia", "Alabama", "Kentucky", "Mississippi", "Tennessee", "Arkansas", "Louisiana", "Oklahoma", "Texas") ~ "South",
-                             State %in% c("Arizona", "Colorado", "Idaho", "New Mexico", "Montana", "Utah", "Wyoming", "Nevada", "Alaska", "California", "Hawaii", "Oregon", "Washington") ~ "West"))
-```
 
 ## Vorstellen
 Mein Name ist Henrik und ich komme vom Max-Planck Institut für Demografische Forschung. Ich arbeite zurzeit an meiner Dissertation über die Fertilität von Männern. Keine Sorge, ich zähle keine Spermien. Dass überlassen ich den Kollegen in der Biologie und Universitätmedizing. **Fertilität** in der Demographie ist das Geburtenverhalten, also die Anzahl der Kinder die in einer Bevölkerung bzw. von Personen im Durchschnitt bekommen werden, und welche Faktoren eine Rolle spielen für diese Zahl. **Fekundität** ist das biologische Vermögen Kinder zu bekommen.
@@ -52,31 +27,87 @@ Heute möchte ich meine Studie zum Thema Entwicklung und Fertilität in den Vere
 ## Warum Studie
 Erstens, die Debatte zum Zusammenhang zwischen Entwicklung und Geburtenverhalten hat noch keinen Konsens erreicht in der Disziplin. Dabei scheint eine Antwort so einfach. Schauen sie sich die Fertilität seit Anfang der Industrialisierung an. Gesellschaften wurden reicher und die Fertilität viel zeitgleich. Dieser parallele Trend führte zur Entwicklung von verschiedenen Theorien, die alle besagen, dass Entwicklung und Fertiltät einen negativen Zusammenhang besitzen. Zum Beispiel die Theorie des demografischen Übergangs(@notestein_population_1945) und des zweiten demografischen Übergangs (@lesthaeghe_twee_1986). Eine fallende Kindersterblichkeit reduziert den Bedarf für Geburten, die Bannung der Kinderarbeit reduziert das ökonomische Kalkül für Kinder, steigende Kosten von Kindern reduzieren den Anreiz für Kinder. Darüber hinaus ist mit der steigenden Erwerbstätigkeit von Frauen auch ein Konflikt zwischen Familie und Arbeit aufgekommen, den wir Demografen: Substitutions-Effekt nennen. Alles in allem waren die Zahlen und die Modelle eindeutig. Jedoch, gab es einen Anstieg der Fertilität in Ländern die ein sehr hohes Entwicklungsniveau erreicht hatten (@myrskyla_advances_2009). Die Begründung war, dass Maßnahmen in der Familienpolitik, wie z.B. bezahltes Elterngeld, Kindergeld, Ausbau von Kindertagesstätten et cetera, den zuvor erwähnten Konflikt zwischen familie und Beruf lösen. Diese Umkehr erzeugt ein grafisches Muster, das wie ein umgekehrtes "J" aussieht. Deswegen wollte ich mit neuen Daten prüfen, ob sich dieses "J" auch in anderen Kontexten finden lässt.
 
-![](Images\myrskyla09.jpg)
+```{r}
 
 
+setwd("U:/Rostock11")
+
+# Load the functions
+source("Code/Functions.R")
+
+# Load the data
+d <- read.csv("Data/HDITFR_June_6_2009.csv",
+                               row.names=1)
+
+# Create country column
+d$Country <- rownames(d)
+
+# Years: 1975 2005
+d <- d %>% pivot_longer(cols = !Country, names_to = c("Variable", "Year"), values_to = "Value",  names_pattern = "([a-z]*[A-Z]*).([0-9]*)")
+
+# Function
+transf.tfr <- function(x, mu=31,prop.fem=.4886) log(prop.fem * x)/mu
+transf.hdi <- function(x) -log(1-x)
+
+# Filteryears
+d <- d %>% filter(Year %in% c(1975, 2005)) %>% filter(Variable %in% c("HDI", "TFR")) %>% 
+  pivot_wider(values_from = "Value", names_from = "Variable") %>%
+    mutate(HDI_trans = transf.hdi(HDI),
+           HDI_trans = HDI_trans / max(HDI_trans, na.rm = T), 
+           TFR_trans = transf.tfr(TFR))
+
+# Plot mikko's graph
+ d %>% filter(Year == 1975) %>% 
+  ggplot(aes(HDI_trans, TFR, colour = Year, shape = Year)) +
+  geom_smooth(method = "loess", formula = "y ~ x", se = F, linewidth = 1.5) +
+  geom_point() +
+  xlab("HDI") +
+  scale_colour_manual(values = c(MPIDRgreen, MPIDRred)) +
+  scale_y_continuous(labels = comma_format(decimal.mark = ","), limits = c(1, 9)) +
+  scale_x_continuous(labels = comma_format(decimal.mark = ","), limits = c(0, 1))
+
+#ggsave(plot, height = 10, width = 7, filename = "Figures/Mikko_ggplot.pdf")
+```
+
+```{r Mikko-plot2, fig.height=5, fig.width=5}
+# Plot mikko's graph
+ d %>% 
+  ggplot(aes(HDI_trans, TFR, colour = Year, shape = Year)) +
+  annotate(geom = "rect", xmin = 0.6, xmax = 0.7, ymax = 8.5, ymin = 1, alpha = 0.3) +
+  geom_smooth(method = "loess", formula = "y ~ x", se = F, linewidth = 1.5) +
+  geom_point( ) +
+  xlab("HDI") +
+  scale_colour_manual(values = c(MPIDRgreen, MPIDRred)) +
+  scale_y_continuous(labels = comma_format(decimal.mark = ","), limits = c(1, 9)) +
+  scale_x_continuous(labels = comma_format(decimal.mark = ","), limits = c(0, 1))
+
+#ggsave(plot, height = 10, width = 7, filename = "Figures/Mikko_ggplot.pdf")
+```
 
 
 ## Kritik 
 Zweitens, der "J"-Förmige Zusammenhang wurde von einigen Stimmen in der Demografie angezweifelt, weil dieser Zusammenhang in den Daten nicht zwangsläufig ein kausaler Effekt sein muss. So könnten viele andere Faktoren dieses Muster hervorruffen. Zum Beispiel wird argumentiert, dass der Anstieg von einigen wenigen Ländern erzeugt wird, darunter zählen die USA, UK und die skandinavischen Länder, welche so besonders sind, dass man keinen generellen Schluss ziehen könne. Außerdem könnte der jahrelange Geburtenaufschub einen Nachholeffekt erzeugt haben. Deswegen habe ich mich beschlossen meine Studie durchzuführen, um die verschiedenen Kritikipunkte anzuschauen und ernst zu nehmen. 
 
 
-```{r}
-# HMD Passwort und Nutzername
-nn <- "schubert@demogr.mpg.de"
-pw <- "2021Demographie"
-
-# Load the fertility data
-#readHMDweb(CNTRY = "USA", username = nn, password = pw, header = F)
-```
-
 
 ## Daten
 Wie berchnet man nun die Fertilität. Man braucht einerseits die Zahl der Geburten. Woher bekommt man die Geburten. Man bekommt die Geburten von der Geburtenstatistik, welche aus Angaben von den Geburtszertifikaten besteht. Diese Zertifikate sind offizielle Dokumente, und deswegen haben sie eine sehr hohe Qualität. Ein solches Geburtenzertifikat ist unten abgebildet, und man kann gleich sehen, dass hier alle wichtigen Informationen enthalten sind: Alter der Mutter, Alter des Vaters, Wohnort, Datum. Diese Informationen habe ich für die Jahre von 1969 bis 2018 gesammelt. Das müsst ihr euch vorstellen, dass sind mehr als 100 Millionen Geburten, also 100 Millionen Zertifikate.
 
 
+![](Images/Obama_certificate.jpg)
 
-![](Images\obama_certificate.jpg)
+
+$$ 
+\begin{bmatrix}
+Id & Jahr & State & \cdots & \textrm{Alter (Mutter)} & \textrm{Alter (Vaters)}  \\
+\hline
+1 & 1969 & Alabama & \cdots & 15 & 17 \\
+2 & 1969 & Alabama & \cdots& 15 & 17 \\
+3 & 1969 & Alabama & \cdots& 15 & 18 \\
+\vdots & \vdots  & \ddots &\vdots & \vdots & \vdots \\
+134.584.830 & 2018 & Wyoming & \cdots & 50 & 54 \\
+\end{bmatrix}
+$$
 
 
 Die Geburten sind schon einmal ein guter Start, aber bei weitem nicht ausreichend. Z.B. wird es mehr Geburten geben in Staaten wo viele Menschen leben. Das heißt, ich wollte eine Rate berechnen, welche die Risikobevölkerung berücksichtigt. Außerdem möchte ich noch für die Altersstruktut kontrollieren. Deswegen haben wir altersspezifische Geburtenraten berchnet, welche sich aus der Anzahl der Geburten für Mütter im Alter $x$ geteilt durch die Anzahl der Risikobevölkerung, also Frauen im Alter $x$ berechnet. Also brauchte ich Bevölkerungsdaten aufgeschlüsselt nach Staat, Alter, Geschlecht und Jahr. Diese habe ich vom U.S. Census bekommen.
@@ -97,20 +128,35 @@ $$TFR_{t, i} = \beta_1 HLI_{t-1, i} + \beta_2  HLI^2_{t-1, i} + \lambda_t + \gam
 ## Ergebnisse
 Wir haben herausgefunden, dass ab einem hohen Entwicklungsniveau der Zusammenhang zwischen Entwicklung und Fertilität sich umkehrt. Dies lässt sich auch in der folgenden Grafik \@ref(us_umkehr) entnehmen. Ab einem gewissen nieveau kehrt sich der Zusammenhang um, und weitere Zugewinne in der Entwicklung erhöhen die Fertilität. 
 
-```{r us_umkehr}
+```{r, fig.height=5, fig.width = 8}
+# Load the packages
+library(tidyverse)
+library(HMDHFDplus)
+
+
+# Load the data
+load("Data/analysis.Rda")
+
+
+# Create division
+df <- mutate(df, Division = 
+                             case_when(
+                             State %in% c("New Jersey", "New York", "Pennsylvania", "Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont") ~ "Northeast",
+                             State %in% c("Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", "North Dakota", "South Dakota", "Indiana", "Illinois", "Michigan", "Ohio", "Wisconsin") ~ "Midwest", 
+                             State %in% c("Delaware", "District of Columbia", "Florida", "Georgia", "Maryland", "North Carolina", "South Carolina", "Virginia", "West Virginia", "Alabama", "Kentucky", "Mississippi", "Tennessee", "Arkansas", "Louisiana", "Oklahoma", "Texas") ~ "South",
+                             State %in% c("Arizona", "Colorado", "Idaho", "New Mexico", "Montana", "Utah", "Wyoming", "Nevada", "Alaska", "California", "Hawaii", "Oregon", "Washington") ~ "West"))
+
+# Save the midwest data
+data <- subset(df, Division == "Midwest")
+write.csv(data, "Data/midwest_data.csv")
+
 # Plot
 ggplot(subset(df, Division == "Midwest"), aes(lag_HLI_female, TFR_female, colour = Year)) +
   geom_point(alpha = 0.5) +
-  theme_bw(base_family = "serif", base_size = 20) +
-  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 2, colour = "darkred") +
-  ylab("Zusammengefasste \n Fruchtbarkeitsziffer") + xlab("Entwicklungsindikator") +
-  scale_colour_gradient(low = "navyblue", high = "darkred", name = "Jahr") +
-  theme(legend.position = "bottom",
-        legend.key.width = unit(1.8, "cm"),
-        legend.key.height = unit(0.2, "cm"),
-        axis.title = element_text(face = "bold")) 
-
-ggsave(plot = last_plot(), filename = "Figures/fertility_dev_midwest.pdf", height = 10, width = 12, unit = "cm")
+  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 1.5, colour = MPIDRgreen) +
+  ylab("Zusammengefasste \n Geburtenrate") + xlab("Entwicklungsindikator") +
+  scale_colour_gradient(low = MPIDRpurple, high = MPIDRred, name = "Jahr") +
+  scale_y_continuous(labels = comma_format(decimal.mark = ","), limits = c(1.25, 3)) 
 
 ```
 
@@ -123,82 +169,35 @@ Außerdem habe ich hinweise auf die Mechanismen. Meine Daten deuten darauf hin, 
 Ich möchte abschließen mit einem Hinweis, dass es neben Entwicklung noch viele andere Faktoren gibt, welche die Fertilität beeinflussen. So viel die Geburtenrate nach der Finanzkrise in den USA über mehre Jahre. Außerdem hat die Pandemie in vielen Ländern für Reduktionen in der Fertilität gesorgt, aber es gab auch Schwankungen nach oben, warum eine neue Publikation die Fertilität als *Roller-Coater Fertility* bezeichnet hat
 
 
-```{r Germany}
+```{r Germany, fig.height = 5, fig.width = 8}
+# Load the data
+load("Data/german_lt.Rda")
 
-# Set the account details for global data lab
-GDLun <- "GDpassword"
-GDLpw <- "GDpassword"
- 
-# Password and username for the US mortality database
-myHFDusername <-   #"INSERT_YOUR_USMDB_USERNAME" 
-myHFDpassword <-   #"INSERT_YOUR_USMDB_PASSWORD" 
-
-
-# Load the TFR
-tfr <- readHFDweb(CNTR = "DEUTNP", item = "tfrRR", username = myHFDusername, password = myHFDpassword)
-
-
-# Load the TFR
-lt1 <- readHMDweb(CNTR = "DEUTNP", item = "fltper_1x1",  username = myHFDusername, password = myHFDpassword)
-lt_old <- read.csv("Data/german_lifetables.csv")
-
-# Get the ax-columns
-ax <- subset(lt1, subset = Year == 1990, select = c(ax, Age))
-
-  
-# Subset the data
-lt_old <- subset(lt_old, subset = Sex == 2 & Year1 == Year2 & Year1 >= 1971 & Year1 < 1990, select = c(Year1, Age, d.x., AgeInt))
-
-# Rename variables
-lt_old <- rename(lt_old, Year = Year1, dx = d.x.)
-
-# Merge ax and lt
-lt_old1 <- left_join(lt_old[lt_old$AgeInt == 1,  ], ax) %>% select(-AgeInt)
-
-# Ax for the 5 year life table
-lt_old5 <- lt_old[lt_old$AgeInt == 5, ] %>% mutate(ax = if_else(Age >= 10, 2.5, 1)) %>% select(-AgeInt)
-
-# Bind both life tables together
-lt <- rbind(lt_old1,  lt1[, c("Year", "Age", "ax", "dx")])
-
-# Plot the life table funcitons
-ggplot(lt, aes(Age, dx, colour = Year, group = Year)) +
-  geom_line()
-
-# Estimate the HLI  
-HLI <- lt %>% mutate(d = dx/100000) %>% 
-  group_by(Year) %>% summarise(HLI = prod((Age+ax)^d), .groups = "drop") %>% 
-  select(Year, HLI)
-    
-# Join the data
-d <- left_join(tfr, HLI)
+# Transform the HLI
+d <- d %>% mutate(HLI_trans = log(HLI),
+             HLI_trans2 = HLI_trans / max(HLI_trans, na.rm = T))
 
 # Plot
-ggplot(d, aes(HLI, TFR, colour = Year)) +
-  geom_point(alpha = 0.5) +
-  theme_test(base_family = "serif", base_size = 20) +
-  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 2, colour = "darkred") +
-  ylab("Zusammengefasste \n Fruchtbarkeitsziffer") + xlab("Entwicklungsindikator") +
-  scale_colour_gradient(low = "navyblue", high = "darkred", name = "Jahr") +
-  theme(axis.title = element_text(face = "bold")) +
-  guides(colour = "none")
-
-ggsave(plot = last_plot(), filename = "Figures/j_shape_Deut.pdf")
+ggplot(subset(d, Year >= 1965), aes(Year, TFR, colour = Year)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 2, colour = MPIDRgreen) +
+  ylab("Zusammengefasste \n Geburtenrate") + xlab("Jahr") +
+  scale_colour_gradient(low = MPIDRpurple, high = MPIDRred, name = "Jahr") +
+  scale_y_continuous(labels = comma_format(decimal.mark = ","), limits = c(1.25, 3)) 
 
 
-# Plot
-ggplot(d, aes(HLI, TFR, colour = Year)) +
-  geom_point(alpha = 0.5) +
-  theme_test(base_family = "serif", base_size = 20) +
-  geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 2, colour = "darkred") +
-  ylab("Zusammengefasste \n Fruchtbarkeitsziffer") + xlab("Entwicklungsindikator") +
-  scale_colour_gradient(low = "navyblue", high = "darkred", name = "Jahr") +
-  theme(axis.title = element_text(face = "bold")) +
-  guides(colour = "none")
-
-ggsave(plot = last_plot(), filename = "Figures/fert_increase_Deut.pdf")
 
 ```
+
+---
+
+## Weiterführende Hinweise
+
+- [Meine Ergebnisse zum nachlesen](https://www.demogr.mpg.de/papers/working/wp-2023-022.pdf)
+
+- [Meine Folien zum Runterladen und Herstellen](https://github.com/Henrik-Alexander/Rostock11)
+
+- [Mein Code zum Reproduzieren der Ergebnisse](https://osf.io/mrzb5/?view_only=3c18e2dc1b034b6bb74c4b5ca74b4a53)
 
 
 # Reference

@@ -13,6 +13,7 @@ output:
       countIncrementalSlides: false
       beforeInit: "../assets/cam_macros.js"
       titleSlideClass: ["center","top"]
+layout: true
 editor_options: 
   chunk_output_type: console
 ---
@@ -181,7 +182,7 @@ ggplot(subset(df, Division == "Midwest"), aes(lag_HLI_female, TFR_female, colour
   geom_point(alpha = 0.5) +
   geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 1.5, colour = MPIDRgreen) +
   ylab("Zusammengefasste \n Geburtenrate") + xlab("Entwicklungsindikator") +
-  scale_colour_gradient(low = MPIDRpurple, high = MPIDRgreen, name = "Jahr") +
+  scale_colour_gradient(low = MPIDRpurple, high = MPIDRred, name = "Jahr") +
   scale_y_continuous(labels = comma_format(decimal.mark = ","), limits = c(1.25, 3)) 
 
 ```
@@ -203,7 +204,7 @@ ggplot(subset(d, Year >= 1965), aes(Year, TFR, colour = Year)) +
   geom_point() +
   geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 2, colour = MPIDRgreen) +
   ylab("Zusammengefasste \n Geburtenrate") + xlab("Jahr") +
-  scale_colour_gradient(low = MPIDRpurple, high = MPIDRgreen, name = "Jahr") +
+  scale_colour_gradient(low = MPIDRpurple, high = MPIDRred, name = "Jahr") +
   scale_y_continuous(labels = comma_format(decimal.mark = ","), limits = c(1.25, 3)) 
 
 
