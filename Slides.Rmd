@@ -5,6 +5,7 @@ author: "Henrik-Alexander Schubert"
 date: "`r gsub(' 0', ' ', format(Sys.Date(), format='%d %b %Y'))`"
 output:
     xaringan::moon_reader:
+      self_contained: true
     css: "../assets/cam-css.css"
     lib_dir: libs
     nature:
