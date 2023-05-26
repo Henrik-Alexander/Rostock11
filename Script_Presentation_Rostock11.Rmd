@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = FALSE, warning = F, message = F)
 
 
 ## Vorstellen
-Mein Name ist Henrik und ich komme vom Max-Planck Institut für Demografische Forschung. Ich arbeite zurzeit an meiner Dissertation über die Fertilität von Männern. Keine Sorge, ich zähle keine Spermien. Dass überlassen ich den Kollegen in der Biologie und Universitätmedizing. **Fertilität** in der Demographie ist das Geburtenverhalten, also die Anzahl der Kinder die in einer Bevölkerung bzw. von Personen im Durchschnitt bekommen werden, und welche Faktoren eine Rolle spielen für diese Zahl. **Fekundität** ist das biologische Vermögen Kinder zu bekommen.
+Mein Name ist Henrik und ich komme vom Max-Planck Institut für Demografische Forschung. Ich arbeite zurzeit an meiner Dissertation über die Fertilität von Männern. Wenn ich meinen Freunden das erzähle, dann bekomme ich immer als Antwort "Was? Zählst du Spermien?". Nein, keine Sorge, ich zähle keine Spermien. Dass überlassen ich den Kollegen in der Biologie und Universitätmedizing. **Fertilität** in der Demographie ist das Geburtenverhalten, also die Anzahl der Kinder die in einer Bevölkerung bzw. von Personen im Durchschnitt bekommen werden, und welche Faktoren eine Rolle spielen für diese Zahl. **Fekundität** ist das biologische Vermögen Kinder zu bekommen.
 
 
 ## Transition zum Thema

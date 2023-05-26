@@ -1,35 +1,35 @@
 ---
-title: "Hooray for the J"
-subtitle: "Rostock's 11"
+title: "Wann steigt die Fertilität wieder?"
+subtitle: ""
 author: "Henrik-Alexander Schubert"
-date: "`r gsub(' 0', ' ', format(Sys.Date(), format='%d %b %Y'))`"
+date: null
 output:
-    xaringan::moon_reader:
-      self_contained: true
-    css: "../assets/cam-css.css"
-    lib_dir: libs
-    nature:
-      highlightStyle: tomorrow-night-bright
-      highlightLines: true
-      countIncrementalSlides: false
-      beforeInit: "../assets/cam_macros.js"
-      titleSlideClass: ["center","top"]
-layout: true
+    beamer_presentation
 editor_options: 
   chunk_output_type: console
 ---
 
 ```{r setup,  echo = F}
 #| include: false
-knitr::opts_chunk$set(eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE, dev = "svg", fig.height = 7, fig.width = 7,
+knitr::opts_chunk$set(eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 3.5, fig.width = 5,
                       fig.align = 'center')
 ```
 
+## Begriffe
+
+* **Fertilität = ** Die durschnittliche Anzahl an Geburten pro Frau, unter der Annahme dass die altersspezifischen Geburtenraten konstant bleiben
+
+
+* **Human Development Index = ** Maß von Entwicklung, berücksichtigt Bildung, Gesundheit und Wirtschaftskraft
+ 
+
+
+---
 
 
 ## Meine Motivation
 
-```{r Mikko-plot1, fig.height=5, fig.width=5}
+```{r Mikko-plot1}
 
 setwd("U:/Rostock11")
 
@@ -62,40 +62,52 @@ d <- d %>% filter(Year %in% c(1975, 2005)) %>% filter(Variable %in% c("HDI", "TF
   ggplot(aes(HDI_trans, TFR, colour = Year, shape = Year)) +
   geom_smooth(method = "loess", formula = "y ~ x", se = F, linewidth = 1.5) +
   geom_point() +
-  xlab("HDI") +
-  scale_colour_manual(values = c(MPIDRgreen, MPIDRred)) +
-  scale_y_continuous(labels = comma_format(decimal.mark = ","), limits = c(1, 9)) +
-  scale_x_continuous(labels = comma_format(decimal.mark = ","), limits = c(0, 1))
+  ylab("Geburten pro Frau") +
+  xlab("Entwicklungsindikator") +
+  scale_colour_manual(values = c(MPIDRgreen, MPIDRred), name = "Jahr") +
+  scale_shape_manual(values = c(16, 18), name = "Jahr") +
+  scale_y_continuous(labels = comma_format(decimal.mark = ",", big.mark = "."), limits = c(1, 9)) +
+  scale_x_continuous(labels = comma_format(decimal.mark = ",", big.mark = "."), limits = c(0, 1)) +
+ theme(legend.position = c(0.8, 0.8))
+
 
 #ggsave(plot, height = 10, width = 7, filename = "Figures/Mikko_ggplot.pdf")
 ```
 
 ---
+
+
 ## Meine Motivation
-```{r Mikko-plot2, fig.height=5, fig.width=5}
+```{r Mikko-plot2}
 # Plot mikko's graph
  d %>% 
   ggplot(aes(HDI_trans, TFR, colour = Year, shape = Year)) +
   annotate(geom = "rect", xmin = 0.6, xmax = 0.7, ymax = 8.5, ymin = 1, alpha = 0.3) +
   geom_smooth(method = "loess", formula = "y ~ x", se = F, linewidth = 1.5) +
   geom_point( ) +
-  xlab("HDI") +
-  scale_colour_manual(values = c(MPIDRgreen, MPIDRred)) +
-  scale_y_continuous(labels = comma_format(decimal.mark = ","), limits = c(1, 9)) +
-  scale_x_continuous(labels = comma_format(decimal.mark = ","), limits = c(0, 1))
+  ylab("Geburten pro Frau") +
+  xlab("Entwicklungsindikator") +
+  scale_colour_manual(values = c(MPIDRgreen, MPIDRred), name = "Jahr") +
+  scale_shape_manual(values = c(16, 17),name = "Jahr") +
+  scale_y_continuous(labels = comma_format(decimal.mark = ",", big.mark = "."), limits = c(1, 9)) +
+  scale_x_continuous(labels = comma_format(decimal.mark = ",", big.mark = "."), limits = c(0, 1)) +
+  theme(legend.position = c(0.8, 0.8))
 
 #ggsave(plot, height = 10, width = 7, filename = "Figures/Mikko_ggplot.pdf")
+
 ```
 
 ---
+
+
 ## Daten
 
 
-<img src="Images\obama_certificate.jpg" alt="Upside-down sloths are so cute", width = "40%", height = "50%", class = "center" >
+![](Images/Obama_certificate.jpg)
 
+---
 
-
---
+## Daten
 
 $$ 
 \begin{bmatrix}
@@ -113,7 +125,7 @@ $$
 
 ## Ergebnisse
 
-```{r, fig.height=5, fig.width = 8}
+```{r}
 # Load the packages
 library(tidyverse)
 library(HMDHFDplus)
@@ -141,7 +153,8 @@ ggplot(subset(df, Division == "Midwest"), aes(lag_HLI_female, TFR_female, colour
   geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 1.5, colour = MPIDRgreen) +
   ylab("Zusammengefasste \n Geburtenrate") + xlab("Entwicklungsindikator") +
   scale_colour_gradient(low = MPIDRpurple, high = MPIDRred, name = "Jahr") +
-  scale_y_continuous(labels = comma_format(decimal.mark = ","), limits = c(1.25, 3)) 
+  scale_y_continuous(labels = comma_format(decimal.mark = ",", big.mark = "."), limits = c(1.25, 3)) +
+  guides(colour = "none")
 
 ```
 
@@ -149,7 +162,7 @@ ggplot(subset(df, Division == "Midwest"), aes(lag_HLI_female, TFR_female, colour
 
 
 ## Wie sieht es aus in Deutschland?
-```{r Germany, fig.height = 5, fig.width = 8}
+```{r Germany}
 # Load the data
 load("Data/german_lt.Rda")
 
@@ -161,9 +174,11 @@ d <- d %>% mutate(HLI_trans = log(HLI),
 ggplot(subset(d, Year >= 1965), aes(Year, TFR, colour = Year)) +
   geom_point() +
   geom_smooth(method = "lm", se = F, formula = "y ~ poly(x, 2)", linewidth = 2, colour = MPIDRgreen) +
-  ylab("Zusammengefasste \n Geburtenrate") + xlab("Jahr") +
+  ylab("Geburten pro Frau") + xlab("Jahr") +
   scale_colour_gradient(low = MPIDRpurple, high = MPIDRred, name = "Jahr") +
-  scale_y_continuous(labels = comma_format(decimal.mark = ","), limits = c(1.25, 3)) 
+  scale_y_continuous(labels = comma_format(decimal.mark = ",", big.mark = "."), limits = c(1.25, 3)) +
+  guides(colour = "none")
+
 
 
 
